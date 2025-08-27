@@ -10,7 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Limit to 5 requests per minute
+// Limit to 5 requests per minute for OTP routes
 const limiter = rateLimit({ windowMs: 60 * 1000, max: 5 });
 app.use("/otp/", limiter);
 
@@ -55,5 +55,18 @@ app.post("/otp/verify", async (req, res) => {
   }
 });
 
+// Webhook for incoming SMS
+app.post("/sms-webhook", (req, res) => {
+  const twiml = new twilio.twiml.MessagingResponse();
+
+  // Log incoming SMS
+  console.log("📩 Incoming SMS:", req.body);
+
+  // Respond to the sender
+  twiml.message("Thanks! Your message was received ✅");
+
+  res.type("text/xml").send(twiml.toString());
+});
+
 const port = PORT || 3000;
-app.listen(port, () => console.log(`Server listening on ${port}`));
+app.listen(port, () => console.log(`🚀 Server listening on ${port}`));
